@@ -43,7 +43,19 @@ impl Store {
     ///
     /// Returns an `Option<()>` to enable handling JS exceptions with `?`.
     /// Caches the store into `self.data` to reduce calls to JS.
+    ///
+    /// Uses `&mut self` to borrow mutably since the `data` field of `Store`
+    /// may be modified to update to the new ItemList.
     pub fn fetch_local_storage(&mut self) -> Option<()> {
+        // Initialize a mutable ItemList since it might be manipulated.
+        let mut item_list = ItemList::new();
+
+        // Passes `self.name` as a key for `localStorage` to retrieve the key's value.
+        // This returns a Result<Option<String>>
+        // If we have an get_item executes successfully then the Result is unwrapped.
+        // If there exists a local storage to be fetched, then the Option is unwrapped.
+        // value gets a String.
+        if let Ok(Some(value)) = self.local_storage.get_item(&self.name) {}
         None
     }
 }
