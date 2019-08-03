@@ -5,6 +5,9 @@ authors = ["Benjamin Lee <bnllee@ucdavis.edu>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+# Set crate-type to cydlib to compile to wasm32-unknown-unknown.
+crate-type = ["cdylib"]
 
 [dependencies]
 wasm-bindgen = "0.2.48"
