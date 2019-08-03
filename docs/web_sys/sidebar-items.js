@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["window","Getter for the `Window` object"]],"struct":[["Storage","The `Storage` object"],["Window","The `Window` object"]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Rc","A single-threaded reference-counting pointer. 'Rc' stands for 'Reference Counted'."],["RefCell","A mutable memory location with dynamically checked borrow rules"],["Scheduler","Creates an event loop that starts each time a message is added."]]});

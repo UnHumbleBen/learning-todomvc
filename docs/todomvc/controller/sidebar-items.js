@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ControllerMessage",""]],"struct":[["Controller",""],["Weak","`Weak` is a version of [`Rc`] that holds a non-owning reference to the managed value. The value is accessed by calling [`upgrade`] on the `Weak` pointer, which returns an [`Option`]`<`[`Rc`]`<T>>`."]]});
