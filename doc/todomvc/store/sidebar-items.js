@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["ItemList",""],["Store","Stores items into `localStorage`."]]});
