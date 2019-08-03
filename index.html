@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta content="text/html;charset=utf-8" http-equiv="Content-Type" />
+  <title>web-sys Wasm • TodoMVC</title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+
+<body>
+  <section class="todoapp">
+    <header class="header">
+      <h1>todos</h1>
+      <!-- Autofocus puts focus on the textbox when the page loads. -->
+      <input class="new-todo" placeholder="What needs to be done?" autofocus>
+    </header>
+    <!-- This section is hidden when there are no items on the list. -->
+    <section hidden class="main">
+      <!-- Creates a checkbox for marking all as complete. -->
+      <input id="toggle-all" class="toggle-all" type="checkbox">
+      <!-- Adds a label for accessibility purpose. -->
+      <!-- CSS adds an arrow and hids the inner html. -->
+      <label for="toggle-all">Mark all as complete</label>
+      <!-- Unordered list that contains the tasks. -->
+      <ul class="todo-list"></ul>
+      <footer class="footer">
+        <span class="todo-count"></span>
+        <!-- All li tags that descend from this ul are inlined by css,
+        so they are displayed horizontally. -->
+        <ul class="filters">
+          <li>
+            <a href="#/" class="selected">All</a>
+          </li>
+          <li>
+            <a href="#/active">Active</a>
+          </li>
+          <li>
+            <a href="#/completed">Completed</a>
+          </li>
+        </ul>
+        <button class="clear-completed">Clear completed</button>
+      </footer>
+    </section>
+  </section>
+  <footer class="info">
+    <p>Double-click to edit a todo</p>
+    <p>Written by <a href="http://twitter.com/KingstonTime/">Jonathan Kingston</a></p>
+    <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+  </footer>
+</body>
+
+</html>
