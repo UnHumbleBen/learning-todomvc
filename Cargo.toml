@@ -11,3 +11,5 @@ crate-type = ["cdylib"]
 
 [dependencies]
 wasm-bindgen = "0.2.48"
+# Logs panics to `console.error` to help with debugging.
+console_error_panic_hook = "0.1.5"
