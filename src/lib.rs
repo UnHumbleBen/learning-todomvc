@@ -42,7 +42,9 @@ pub fn app(name: &str) {
     let sched = Rc::new(Scheduler::new());
     // Creates a new `Store`.
     let store = match Store::new(name) {
+        // Assigns store to `Store` if it exists.
         Some(s) => s,
+        // Otherwise, return from `app`.
         None => return,
     };
     // Rc::downgrade(&sched) creates a `Weak` pointer to the scheduler

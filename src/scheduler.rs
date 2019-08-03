@@ -5,6 +5,14 @@ pub use std::cell::RefCell;
 pub use std::rc::Rc;
 
 /// Creates an event loop that starts each time a message is added.
+///
+/// # Fields
+///
+/// - `controller` is a wrapped `Controller`.
+/// - `view` is a wrapped `View`.
+/// - `events` is a wrapped call stack.
+/// - `running` is a wrapped boolean, whose value is `true` when the `Scheduler`
+///   is running and `false` when it is not.
 pub struct Scheduler {
     pub controller: Rc<RefCell<Option<Controller>>>,
     pub view: Rc<RefCell<Option<View>>>,
