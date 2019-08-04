@@ -13,6 +13,8 @@ crate-type = ["cdylib"]
 wasm-bindgen = "0.2.48"
 # Logs panics to `console.error` to help with debugging.
 console_error_panic_hook = "0.1.6"
+# Bindings to JavaScript's standard, built-in objects, including their methods and properties.
+js-sys = "0.3.25"
 
 # web-sys offers conditional features, so they are added manually here.
 [dependencies.web-sys]
