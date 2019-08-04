@@ -147,15 +147,32 @@ impl Store {
         Some(())
     }
 }
+/// A trait for a list of items of type `T`.
+///
+/// TODO(benlee12): why use a trait?
+///
+/// TODO(benlee12): why do public traits must have public functions?
+pub trait ItemListTrait<T> {
+    /// Initializes an empty list of items.
+    fn new() -> Self;
+    /// Appends `item` to the back of the list of items.
+    fn push(&mut self, item: T);
+}
 
-pub struct ItemList {}
+pub struct ItemList {
+    list: Vec<Item>,
+}
 
-impl ItemList {
-    pub fn new() -> ItemList {
-        ItemList {}
+impl ItemListTrait<Item> for ItemList {
+    fn new() -> ItemList {
+        // Initializes the struct with an empty vector in the `list` field.
+        ItemList { list: Vec::new() }
     }
 
-    pub fn push(&mut self, item: Item) {}
+    fn push(&mut self, item: Item) {
+        // Appends `item` to the back of the `list`.
+        self.list.push(item);
+    }
 }
 
 /// Represents a todo item.
