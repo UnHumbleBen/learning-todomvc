@@ -15,10 +15,10 @@ pub use std::rc::Weak;
 /// - `active_route`
 /// - `last_active_route`
 pub struct Controller {
-    store: Store,
-    sched: RefCell<Option<Weak<Scheduler>>>,
-    active_route: String,
-    last_active_route: String,
+    pub store: Store,
+    pub sched: RefCell<Option<Weak<Scheduler>>>,
+    pub active_route: String,
+    pub last_active_route: String,
 }
 
 impl Controller {

@@ -16,6 +16,8 @@ pub mod scheduler;
 pub mod store;
 /// Presentation layer.
 pub mod view;
+/// Element wrapper to the DOM.
+pub mod element;
 
 // Imports neccesary structs from the modules declared above.
 pub use crate::controller::{Controller, ControllerMessage};

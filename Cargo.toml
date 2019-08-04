@@ -22,4 +22,5 @@ version = "0.3.25"
 features = [
     'Window',
     'Storage', # required for the function Window::local_storage
+    'EventTarget', # used in view.rs for callbacks
 ]
