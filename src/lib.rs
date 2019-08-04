@@ -19,6 +19,12 @@ pub mod store;
 /// Presentation layer.
 pub mod view;
 
+// Used for debugging.
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
+}
+
 // Imports neccesary structs from the modules declared above.
 pub use crate::controller::{Controller, ControllerMessage};
 pub use crate::scheduler::Scheduler;
