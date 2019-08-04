@@ -10,6 +10,4 @@ impl View {
     pub fn init(&mut self) {}
 }
 
-pub enum ViewMessage {
-
-}
+pub enum ViewMessage {}

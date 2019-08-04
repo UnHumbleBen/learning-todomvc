@@ -47,12 +47,18 @@ pub fn app(name: &str) {
         // Otherwise, return from `app`.
         None => return,
     };
+    // Initializes the Controller.
+    //
     // Rc::downgrade(&sched) creates a `Weak` pointer to the scheduler
     // and the pointer has type Weak<Scheduler>
+    // TODO(benlee12): Why do we need a weak pointer?
+    //
+    // Moves store and a weak pointer to sched.
     let controller = Controller::new(store, Rc::downgrade(&sched));
     // sched.clone() returns a copy of `sched`, which had type Rc<Scheduler>
+    // TODO(benlee12): Check that this is equivalent to Rc::clone(&sched)
     // View::new() returns an Option<View>, so the type of `view` is View.
-    if let Some(mut view) = View::new(sched.clone()) {
+    if let Some(mut view) = View::new(Rc::clone(&sched)) {
         // sch is a immutable reference to `sched`.
         let sch: &Rc<Scheduler> = &sched;
         // Initializes the View.
