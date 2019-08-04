@@ -25,4 +25,6 @@ features = [
     'EventTarget', # used in view.rs for callbacks
     'Document',
     'Location', # used for the function Document::location
+    'HtmlElement', # used for the function Document::body
+    'Element',
 ]
