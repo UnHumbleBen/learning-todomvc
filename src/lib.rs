@@ -10,14 +10,14 @@ pub use std::rc::Rc;
 
 /// Controller of the program.
 pub mod controller;
+/// Element wrapper to the DOM.
+pub mod element;
 /// Schedules messages to the `Controller` and `View`.
 pub mod scheduler;
 /// Stores item into local storage.
 pub mod store;
 /// Presentation layer.
 pub mod view;
-/// Element wrapper to the DOM.
-pub mod element;
 
 // Imports neccesary structs from the modules declared above.
 pub use crate::controller::{Controller, ControllerMessage};

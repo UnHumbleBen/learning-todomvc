@@ -23,4 +23,6 @@ features = [
     'Window',
     'Storage', # required for the function Window::local_storage
     'EventTarget', # used in view.rs for callbacks
+    'Document',
+    'Location', # used for the function Document::location
 ]
