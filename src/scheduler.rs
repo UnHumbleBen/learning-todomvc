@@ -76,6 +76,7 @@ impl Scheduler {
             }
         };
         // TODO(benlee12): Why the extra scope? For code symmetry?
+        // Add new message to the call stack.
         {
             // Tries to mutably borrow the wrapped vector of messages.
             if let Ok(mut events) = self.events.try_borrow_mut() {
@@ -93,5 +94,44 @@ impl Scheduler {
     }
 
     /// Start the event loop, taking messages from the stack to run.
-    pub fn run(&self) {}
+    pub fn run(&self) {
+        let mut events_len = 0;
+        {
+            // Tries to mutably borrow the wrapped vector of messages.
+            if let Ok(events) = self.events.try_borrow() {
+                // The borrow was successful, assigns actual event length.
+                // Even though clone() is not needed, explicitly writing it
+                // makes the intent clearer.
+                events_len = events.len().clone();
+            } else {
+                // The vector is currently mutably borrowed.
+                exit("this might be a deadlock");
+            }
+        }
+        if events_len == 0 {
+            // There are no more events in the call stack, so turn off running.
+            if let Ok(mut running) = self.running.try_borrow_mut() {
+                // The borrow was successful, set bool to false.
+                *running = false;
+            } else {
+                // The bool is already borrowed, so log error.
+                exit("This might be a deadlock");
+            }
+        } else {
+            // There are still events in the call stack, so turn on running.
+            // TODO(benlee12): Why create an extra scope?
+            {
+                if let Ok(mut running) = self.running.try_borrow_mut() {
+                    // The borrow was successful, set bool to true.
+                    *running = true;
+                } else {
+                    // The bool is already borrowed, so log error.
+                    exit("This might be a deadlock");
+                }
+            }
+            self.next_message();
+        }
+    }
+
+    pub fn next_message(&self) {}
 }
