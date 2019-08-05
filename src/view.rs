@@ -286,6 +286,10 @@ impl View {
     pub fn bind_edit_item(&mut self) {}
     pub fn bind_remove_completed(&mut self) {}
     pub fn bind_toggle_all(&mut self) {}
+
+    /// Used by `Scheduler` to convert a `ViewMessage` into a function call on
+    /// a `View`.
+    pub fn call(&mut self, method_name: ViewMessage) {}
 }
 
 pub enum ViewMessage {}

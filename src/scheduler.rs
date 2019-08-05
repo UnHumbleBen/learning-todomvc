@@ -79,6 +79,24 @@ impl Scheduler {
         // Add new message to the call stack.
         {
             // Tries to mutably borrow the wrapped vector of messages.
+            // Notice that `mut` keyword in the pattern. This is declaring the
+            // moved borrow as `mut` so that we can mutate the moved object.
+            //
+            // Do not get confused between interior mutability of RefCell
+            // and exterior mutability of RefMut. You may be wondering why
+            // `mut` is needed here if events is a RefCell. Wasn't the whole
+            // purpose of RefCell to allow interior mutability? Well it is, and
+            // in fact, that is being used here, but its subtle. Notice that
+            // self is immutable. This means that it should be impossible to
+            // modify any of the fields of self, including events. This is
+            // where RefCell comes in. Using unsafe code, it returns a RefMut,
+            // which is a wrapper for the mutably borrowed Vec<Message>.
+            // Now there is no more unsafe code! Everything after now will
+            // now obey the normal mutability rules. If we declare `events`
+            // without the `mut` keyword, then `events` in immutable.
+            // Therefore, its field, even though it is a mutable reference,
+            // is immutable. By using the `mut` keyword, the RefMut struct is
+            // mutable, so the underlying value is also mutable.
             if let Ok(mut events) = self.events.try_borrow_mut() {
                 // The borrow was successful, add message to the call stack.
                 events.push(message);
@@ -121,6 +139,12 @@ impl Scheduler {
             // There are still events in the call stack, so turn on running.
             // TODO(benlee12): Why create an extra scope?
             {
+                // If `mut` is removed, the compiler will complain about
+                // mutably borrowing a immutable value. This is because of
+                // deref coercion on `running`. Since deref_mut needs to
+                // mutably borrow `running`, `running` must be declared as
+                // `mut`. This makes sense since we are changing its value
+                // after all!
                 if let Ok(mut running) = self.running.try_borrow_mut() {
                     // The borrow was successful, set bool to true.
                     *running = true;
@@ -133,5 +157,81 @@ impl Scheduler {
         }
     }
 
-    pub fn next_message(&self) {}
+    /// Pops the call stack and handles the call appropriately.
+    pub fn next_message(&self) {
+        // Pops the call stack for a Message.
+        let event = {
+            // Tries to borrow the list of callbacks.
+            if let Ok(mut events) = self.events.try_borrow_mut() {
+                // Deref coercion, pops the call stack, returns the potentially
+                // popped event as an Option<Option<Message>>
+                //
+                // If the vector is not empty, the return type will be
+                // Some(Some(Message)).
+                //
+                // If the vector is empty, the return type will be
+                // Some(None);
+                //
+                // The outer Some indicates the success of the borrow.
+                Some(events.pop())
+            } else {
+                // Borrow was not successful, events already borrowed.
+                exit("This might be a deadlock");
+                None
+            }
+        };
+        // Based on Message, Scheduler determines which function to call in
+        // either View or Controller, which will handle the Message itself.
+        if let Some(Some(event)) = event {
+            match event {
+                // Pattern matching:
+                // PATTERN = Message::Controller(controller::ControllerMessage)
+                // EXPRESS = Message::Controller(e)
+                // e = controller::ControllerMessage;
+                Message::Controller(e) => {
+                    // Tries to mutably borrow the controller.
+                    if let Ok(mut controller) = self.controller.try_borrow_mut() {
+                        // Borrow successful,
+                        // controller = RefMut<Option<Controller>>
+                        if let Some(ref mut ag) = *controller {
+                            ag.call(e);
+                        }
+                    } else {
+                        exit("This might be a deadlock");
+                    }
+                }
+                Message::View(e) => {
+                    // self.view = Rc<RefCell<Option<View>>>
+                    // Deref coercion -> RefCell<Option<View>>
+                    // try_borrow_mut(&self) -> Result<RefMut<Option<View>>>
+                    // view = RefMut<Option<View>>
+                    if let Ok(mut view) = self.view.try_borrow_mut() {
+                        // Note: the ref mut keyword changes the usual move to
+                        // a mutable borrow. Usually match statements moves the
+                        // value.
+                        //
+                        // Pattern Matching
+                        // PATTERN = Some(ref mut ag)
+                        // EXPRESS = Option<View>
+                        // ag = &mut View
+                        if let Some(ref mut ag) = *view {
+                            // Calls function on a view based on message `e`.
+                            ag.call(e);
+                        }
+                    } else {
+                        exit("This might be a deadlock");
+                    }
+                }
+            }
+            // Continues to the next iteration of run().
+            self.run();
+        } else if let Ok(mut running) = self.running.try_borrow_mut() {
+            // Since we couldn't find a new Message, we cleared the event
+            // stack, so we should set running to false.
+            *running = false;
+        } else {
+            // Deadlock cause running is borrowed elsewhere.
+            exit("This might be a deadlock");
+        }
+    }
 }

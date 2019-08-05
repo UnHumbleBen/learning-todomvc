@@ -32,6 +32,10 @@ impl Controller {
             last_active_route: "none".into(),
         }
     }
+
+    /// Used by `Scheduler` to convert a `ControllerMessage` into a function
+    /// call on a `Controller`.
+    pub fn call(&mut self, method_name: ControllerMessage) {}
 }
 
 pub enum ControllerMessage {
