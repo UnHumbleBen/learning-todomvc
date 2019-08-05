@@ -27,4 +27,5 @@ features = [
     'Location', # used for the function Document::location
     'HtmlElement', # used for the function Document::body
     'Element',
+    'console', # enables use of console.exception() function.
 ]

@@ -40,8 +40,50 @@ pub enum Message {
 }
 
 /// Used for debugging to the console.
+///
+/// Outputs an error message to the Web Console.
+///
+/// Terminates the process in an abnormal fashion.
+///
+/// Never returns and immediately terminates the current process in a platform
+/// specific "abnormal" manner.
+///
+/// Note that because this function never returns, and that it terminates the
+/// process, no destructors on the current stack or any other thread's stack
+/// will run.
+///
+/// This in contrast to the default behaviour of `panic!` which unwinds the
+/// current thread's stack and call all destructors. When `panic="abort"` is
+/// set, either as an argument to `rustc` or in a crate's Cargo.toml, `panic!`
+/// and `abort` are similar. However, `panic!` will still call the `panic hook`
+/// while `abort` will not.
+///
+/// If a clean shutdown is needed, it is recommended to only call this function
+/// at a known point where there are no more destructors left to run.
+///
+/// Description of `abort` is based on the [Standard Documentation](
+/// https://doc.rust-lang.org/std/process/fn.abort.html)
+///
+/// # Syntax
+///
+/// ```
+/// exit(message)
+/// ```
+///
+/// ## Parameters
+///
+/// ### `message`
+///
+/// A Rust string slice.
 pub fn exit(message: &str) {
-
+    // TODO(benlee12): Why does Github example add &message.to_string()?
+    // Creates a new JsValue which is a string.
+    let v = wasm_bindgen::JsValue::from_str(message);
+    // Note that this is an alias for Console.error
+    // Outputs the message to the Web Console.
+    web_sys::console::exception_1(&v);
+    // Terminates the process in an abnormal fashion.
+    std::process::abort();
 }
 /// Runs the app.
 ///
