@@ -39,6 +39,10 @@ pub enum Message {
     View(ViewMessage),
 }
 
+/// Used for debugging to the console.
+pub fn exit(message: &str) {
+
+}
 /// Runs the app.
 ///
 /// 1. Creates a `Scheduler`, `Store`, `Controller`, and `View`.

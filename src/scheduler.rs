@@ -1,4 +1,5 @@
 pub use crate::controller::Controller;
+pub use crate::exit;
 pub use crate::view::View;
 pub use crate::Message;
 pub use std::cell::RefCell;
@@ -50,5 +51,47 @@ impl Scheduler {
     pub fn set_view(&self, view: View) {}
     pub fn set_controller(&self, controller: Controller) {}
     /// Add a new message onto the event stack.
-    pub fn add_message(&self, message: Message) {}
+    ///
+    /// Triggers running the event loop if it's not already running.
+    pub fn add_message(&self, message: Message) {
+        // Assigns `running` to be the unwrapped running field.
+        let running = {
+            // Tries to immutably borrow the wrapped bool.
+            if let Ok(running) = self.running.try_borrow() {
+                // The borrow was successful, so clone the bool.
+                // Note that deref coercion is used here since running is of
+                // type Ref<bool> which implements the Deref trait.
+                // TODO(benlee12): Does *running work?
+                // Potential answer: Yes, but only because bool implement the
+                // Copy trait.
+                running.clone()
+            } else {
+                // The bool is currently mutably borrowed, so log error.
+                // TODO(benlee12): Why is it deadlock?
+                // I suspect it is because another function is currently
+                // modifying the bool, so it is a deadlock but not in the sense
+                // used in concurrency.
+                exit("This might be a deadlock");
+                false
+            }
+        };
+        // TODO(benlee12): Why the extra scope? For code symmetry?
+        {
+            // Tries to mutably borrow the wrapped vector of messages.
+            if let Ok(mut events) = self.events.try_borrow_mut() {
+                // The borrow was successful, add message to the call stack.
+                events.push(message);
+            } else {
+                // The vector is currently mutably borrowed.
+                exit("This might be a deadlock");
+            }
+        }
+        // Triggers running the event loop if it's not already running.
+        if !running {
+            self.run();
+        }
+    }
+
+    /// Start the event loop, taking messages from the stack to run.
+    pub fn run(&self) {}
 }
