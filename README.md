@@ -10,7 +10,7 @@ Progress:
     - [x] `store::Store::new`
     - [x] `controller::Controller::new`
     - [x] `view::View::new`
-        - [x]`element::Element::qs`
+        - [x] `element::Element::qs`
     - [ ] `view::View::init`
         - [ ] `scheduler::Scheduler::add_message`
             - [ ] `scheduler::Scheduler::run`
