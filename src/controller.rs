@@ -1,4 +1,10 @@
-pub use crate::{Scheduler, Store};
+// Controller needs access to Item and Store structs.
+pub use crate::store::*;
+// Controller needs to send messages to View.
+pub use crate::view::ViewMessage;
+pub use crate::Scheduler;
+// Used for generating ids.
+pub use js_sys::Date;
 pub use std::cell::RefCell;
 pub use std::rc::Weak;
 
@@ -8,17 +14,19 @@ pub use std::rc::Weak;
 ///
 /// # Fields
 ///
-/// - `store` is the struct that stores item into `localStorage`.
-/// - `sched` is a reference cell to the weak pointer to the scheduler.
-///   - TODO(benlee12): The Option could possibly be for deallocation.
-/// - TODO(benlee12): Check if the string includes "#" or not.
-/// - `active_route` is the fragment string of the URL
-/// - `last_active_route` is the previous `active_route`. It is used to
-///   determine whether the displayed list needs to be refreshed or not.
 pub struct Controller {
+    /// the struct that stores item into `localStorage`.
     pub store: Store,
+    /// A reference cell to the weak pointer to the scheduler.
+    ///
+    /// TODO(benlee12): The Option could possibly be for deallocation.
     pub sched: RefCell<Option<Weak<Scheduler>>>,
+    /// TODO(benlee12): Check if the string includes "#" or not.
+    ///
+    /// The fragment string of the URL
     pub active_route: String,
+    /// The previous `active_route`. It is used to
+    ///   determine whether the displayed list needs to be refreshed or not.
     pub last_active_route: String,
 }
 
@@ -43,23 +51,51 @@ impl Controller {
         match method_name {
             AddItem(title) => self.add_item(title),
             SetPage(hash) => self.set_page(hash),
+            // TODO(benlee12): Why do we need to move id and value?
             EditItemSave(id, value) => self.edit_item_save(id, value),
+            // TODO(benlee12): Why do we need to move id?
             EditItemCancel(id) => self.edit_item_cancel(id),
             RemoveCompleted() => self.remove_completed_items(),
+            // Note that we only need to take a string slice here, rather than
+            // moving the entire String over. To remove an item, we just need
+            // use the string as a key. But in the other methods, we actually
+            // need to store the String.
             RemoveItem(id) => self.remove_item(&id),
             ToggleAll(completed) => self.toggle_all(completed),
+            // TODO(benlee12): Why do we need to move id?
             ToggleItem(id, completed) => self.toggle_item(id, completed),
         }
     }
 
-    pub fn add_item(&mut self, title: String) {}
+    /// Adds an `Item` to the `Store` with the title `title`.
+    ///
+    /// Signals the `View` to display it in the list.
+    pub fn add_item(&mut self, title: String) {
+        // Inserts item new Item to Store.
+        self.store.insert(Item {
+            // Uses the number of milliseconds elapsed since January 1, 1970
+            // 00:00:00 UTC as an id.
+            id: Date::now().to_string(),
+            title,
+            // Item starts off as active.
+            completed: false,
+        });
+        // Tells View to clear the new todo input.
+        self.add_message(ViewMessage::ClearNewTodo());
+        // Refreshs the list.
+        self._filter(true);
+    }
     pub fn set_page(&mut self, hash: String) {}
     pub fn edit_item_save(&mut self, id: String, title: String) {}
     pub fn edit_item_cancel(&mut self, id: String) {}
     pub fn remove_completed_items(&mut self) {}
-    pub fn remove_item(&mut self, id: String) {}
+    pub fn remove_item(&mut self, id: &String) {}
     pub fn toggle_all(&mut self, completed: bool) {}
+    pub fn toggle_item(&mut self, id: String, completed: bool) {}
 
+    pub fn add_message(&self, view_message: ViewMessage) {}
+    /// Refresh the list based on the current route.
+    pub fn _filter(&mut self, force: bool) {}
 }
 
 /// Messages that represent the methods to be called on the Controller

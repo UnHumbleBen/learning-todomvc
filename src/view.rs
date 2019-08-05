@@ -10,28 +10,23 @@ pub use wasm_bindgen::JsCast;
 pub use wasm_bindgen::prelude::*;
 
 /// Presentation layer.
-///
-/// # Fields
-///
-/// - `sched` is a shareable mutable container using references to a reference
-///   counted pointer to a Scheduler
-/// - Wrappers of DOM elements
-///   - `todo_list` is the ul for the todo list.
-///   - `todo_item_counter` is the span that contains the counter.
-///   - `clear_completed` is the button that clears completed.
-///   - `main` is the section that contains the todo list.
-///   - `toggle_all` is the label for the checkbox for marking all as complete.
-///   - `new_todo` is the input textbox that adds new todos.
-/// - `callbacks`
-/// - TODO(benlee12): figure out what `callbacks` does.
 pub struct View {
+    /// shareable mutable container using references to a reference
+    /// counted pointer to the Scheduler
     pub sched: RefCell<Rc<Scheduler>>,
+    /// `<ul>` for the todo list.
     pub todo_list: Element,
+    /// `<span>` that contains the counter.
     pub todo_item_counter: Element,
+    /// `<button>` that clears completed.
     pub clear_completed: Element,
+    /// `<section>` that contains the todo list.
     pub main: Element,
+    /// `<label>` for the checkbox for marking all as complete.
     pub toggle_all: Element,
+    /// `<input>` textbox that adds new todos.
     pub new_todo: Element,
+    /// TODO(benlee12): figure out what `callbacks` does.
     pub callbacks: Vec<(web_sys::EventTarget, String, Closure<dyn FnMut()>)>,
 }
 
@@ -292,4 +287,7 @@ impl View {
     pub fn call(&mut self, method_name: ViewMessage) {}
 }
 
-pub enum ViewMessage {}
+pub enum ViewMessage {
+    // TODO(benlee12): Why not just use a unit struct?
+    ClearNewTodo(),
+}

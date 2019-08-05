@@ -146,6 +146,8 @@ impl Store {
         // benefit of easy handling with `?`.
         Some(())
     }
+
+    pub fn insert(&mut self, item: Item) {}
 }
 /// A trait for a list of items of type `T`.
 ///
@@ -176,14 +178,11 @@ impl ItemListTrait<Item> for ItemList {
 }
 
 /// Represents a todo item.
-///
-/// # Fields
-///
-/// - `title` is the name of the todo.
-/// - `completed` is `true` if the todo is completed, `false otherwise.
-/// - `id` is an unique id to identify this todo.
 pub struct Item {
+    /// The name of the todo.
     pub title: String,
+    /// `true` if the todo is completed, `false` otherwise.
     pub completed: bool,
+    /// A unique id to identify this todo.
     pub id: String,
 }
