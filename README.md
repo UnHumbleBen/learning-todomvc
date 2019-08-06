@@ -19,6 +19,9 @@ Progress:
                         - [ ] `controller::Controller::[all message handlers]`
                             - [x] `controller::Controller::add_message`
                             - [ ] `controller::Controller::_filter`
+                            - [ ] `store::Store::insert`
+                                - [ ] `store::(ItemList as ItemListTrait)::push`
+                                - [ ] `store::Store::sync_local_storage`
                     - [ ] `view::View::call`
         - [ ] `view::View::bind_[*]`
     - [ ] `scheduler::Scheduler::set_view`
