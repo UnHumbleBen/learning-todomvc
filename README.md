@@ -29,7 +29,7 @@ to learn how MVC works in this language.
     - [ ] `scheduler::Scheduler::set_controller`
         - [ ] dependent functions
 
-Note that checked means that the function has been implemented, but it will
+Note that checked means that the function has been implemented, but it will not
 work until all of the functions it uses are also implemented.
 
 Example comes from [The `wasm-bindgen` Guide](https://rustwasm.github.io/docs/wasm-bindgen/examples/todomvc.html)
