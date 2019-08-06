@@ -10,6 +10,8 @@ pub use wasm_bindgen::JsCast;
 pub use wasm_bindgen::prelude::*;
 
 /// Presentation layer.
+///
+/// TODO(benlee12): Why does example use #[wasm_bindgen]
 pub struct View {
     /// shareable mutable container using references to a reference
     /// counted pointer to the Scheduler

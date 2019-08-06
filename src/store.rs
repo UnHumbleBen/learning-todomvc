@@ -22,7 +22,6 @@
 //!
 //! where `title` is a String containing the task, `completed` is a bool
 //! indicating task completion, and `id` is a `String` identifier for the task.
-
 /// The JSON object contains methods for parsing JavaScript Object Notation
 /// (JSON) and converting values to JSON.
 pub use js_sys::JSON;
@@ -210,10 +209,10 @@ impl Store {
         if let Ok(storage_string) = JSON::stringify(&JsValue::from(array)) {
             // TODO(benlee12): Remove unnecessary .to_string() and
             // add this .set_item(&self.name, &storage_string) below
-            let storage_string: String = storage_string.to_string().into();
+            let storage_string: String = storage_string.into();
             self.local_storage
                 // Passes `name` as key and storage string as
-                .set_item(&self.name, storage_string.as_str())
+                .set_item(&self.name, &storage_string)
                 // Simple error handling.
                 .unwrap();
         }
