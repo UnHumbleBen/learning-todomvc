@@ -21,7 +21,7 @@ to learn how MVC works in this language.
                             - [ ] `controller::Controller::_filter`
                             - [x] `store::Store::insert`
                                 - [x] `store::(ItemList as ItemListTrait)::push`
-                                - [ ] `store::Store::sync_local_storage`
+                                - [x] `store::Store::sync_local_storage`
                     - [ ] `view::View::call`
         - [ ] `view::View::bind_[*]`
     - [ ] `scheduler::Scheduler::set_view`

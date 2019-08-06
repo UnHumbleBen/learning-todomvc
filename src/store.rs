@@ -1,21 +1,47 @@
+//! Accessors for `localStorage`
+//!
+//! Uses the following JavaScript format to store the todo items list.
+//!
+//! ```
+//! [
+//!      todo_item_1,
+//!      todo_item_2,
+//!      // --snip--
+//! ]
+//! ```
+//!
+//! Each todo_item is stored as follows,
+//!
+//! ```
+//! [
+//!      todo_item.title,
+//!      todo_item.completed,
+//!      todo_item.id,
+//! ]
+//! ```
+//!
+//! where `title` is a String containing the task, `completed` is a bool
+//! indicating task completion, and `id` is a `String` identifier for the task.
+
 /// The JSON object contains methods for parsing JavaScript Object Notation
 /// (JSON) and converting values to JSON.
 pub use js_sys::JSON;
+/// Imports JsValue
+pub use wasm_bindgen::prelude::*;
 /// Stores items into `localStorage`.
-///
-/// # Fields
-///
-/// - `local_storage` is the `localStorage` which contains data stored across browser sessions.
-/// - `data` contains a list of all the todo items.
-/// - `name` is the value of key used to access `localStorage`.
 pub struct Store {
+    /// `localStorage` which contains data stored across browser sessions.
     pub local_storage: web_sys::Storage,
+    /// Contains a list of all the todo items.
     pub data: ItemList,
+    /// The value of key used to access `localStorage`.
     pub name: String,
 }
 impl Store {
     /// Creates a new store with `name` as the local storage value name.
     /// Caches the `localStorage` for todo items if it exists.
+    ///
+    /// # Implementation Details
     ///
     /// Uses `Option<Store>` as the return type to enable handling of JS exceptions with `?`,
     /// naturally propagting it upwards to the wasm boundary.
@@ -43,13 +69,15 @@ impl Store {
 
     /// Reads the local `ItemList` from `localStorage`.
     ///
+    /// # Implementation Details
+    ///
     /// Returns an `Option<()>` to enable handling JS exceptions with `?`.
     /// Caches the store into `self.data` to reduce calls to JS.
     ///
     /// Uses `&mut self` to borrow mutably since the `data` field of `Store`
     /// may be modified to update to the new ItemList.
     ///
-    /// # Procedure
+    /// ## Procedure
     ///
     /// 1. Query the `localStorage` for the list of todo items.
     /// 2. Iterate through the list of todo items, copying each one to a cache.
@@ -157,7 +185,39 @@ impl Store {
         Some(ItemListSlice { list: vec![] })
     }
 
-    pub fn sync_local_storage(&mut self) {}
+    /// Writes the local `ItemList` to `localStorage`.
+    pub fn sync_local_storage(&mut self) {
+        // Creates an empty JS Array to serialize the list of todo items.
+        let array = js_sys::Array::new();
+        // Serialize each item into child, then push each child into array.
+        for item in self.data.iter() {
+            // Create an empty JS Array for serializing a single todo item.
+            let child = js_sys::Array::new();
+            // TODO(benlee12): Why do we need to clone?
+            // TODO(benlee12): Why does push borrow?
+            child.push(&JsValue::from(&item.title));
+
+            // The way based on the example
+            // let s = item.title.clone();
+            // child.push(&JsValue::from(&s));
+
+            child.push(&JsValue::from(item.completed));
+            child.push(&JsValue::from(&item.id));
+
+            array.push(&JsValue::from(child));
+        }
+        // Converts `array` into a JSON formatted JsString.
+        if let Ok(storage_string) = JSON::stringify(&JsValue::from(array)) {
+            // TODO(benlee12): Remove unnecessary .to_string() and
+            // add this .set_item(&self.name, &storage_string) below
+            let storage_string: String = storage_string.to_string().into();
+            self.local_storage
+                // Passes `name` as key and storage string as
+                .set_item(&self.name, storage_string.as_str())
+                // Simple error handling.
+                .unwrap();
+        }
+    }
 }
 /// A trait for a list of items of type `T`.
 ///
@@ -169,6 +229,8 @@ pub trait ItemListTrait<T> {
     fn new() -> Self;
     /// Appends `item` to the back of the list of items.
     fn push(&mut self, item: T);
+    /// Returns an iterator over the slice.
+    fn iter(&self) -> std::slice::Iter<'_, T>;
 }
 
 pub struct ItemList {
@@ -184,6 +246,11 @@ impl ItemListTrait<Item> for ItemList {
     fn push(&mut self, item: Item) {
         // Appends `item` to the back of the `list`.
         self.list.push(item);
+    }
+
+    fn iter(&self) -> std::slice::Iter<'_, Item> {
+        // Returns an iterator over the vector slice.
+        self.list.iter()
     }
 }
 
