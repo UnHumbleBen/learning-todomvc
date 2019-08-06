@@ -2,7 +2,8 @@
 pub use crate::store::*;
 // Controller needs to send messages to View.
 pub use crate::view::ViewMessage;
-pub use crate::Scheduler;
+// Needs to add messages to the Scheduler.
+pub use crate::{Message, Scheduler};
 // Used for generating ids.
 pub use js_sys::Date;
 pub use std::cell::RefCell;
@@ -93,7 +94,28 @@ impl Controller {
     pub fn toggle_all(&mut self, completed: bool) {}
     pub fn toggle_item(&mut self, id: String, completed: bool) {}
 
-    pub fn add_message(&self, view_message: ViewMessage) {}
+    /// Forwards `view_message` to the Scheduler.
+    pub fn add_message(&self, view_message: ViewMessage) {
+        // self.sched = RefCell<Option<Weak<Scheduler>>>
+        // Unwraps RefCell
+        if let Ok(sched) = self.sched.try_borrow() {
+            // sched = RefMut<Option<Weak<Scheduler>>
+            // Unwraps Option
+            if let Some(ref sched) = *sched {
+                // sched = Weak<Scheduler>
+                // Converts Weak to Rc
+                if let Some(sched) = sched.upgrade() {
+                    // sched = Rc<Scheduler>
+                    //
+                    // Yes! This increases the strong count, see this:
+                    // https://play.rust-lang.org/?version=stable&mode=debug&edition=2018&gist=22f9c0ff181c70f2739f43b9350df0b2
+                    //
+                    // deref coercion -> Scheduler
+                    sched.add_message(Message::View(view_message));
+                }
+            }
+        }
+    }
     /// Refresh the list based on the current route.
     pub fn _filter(&mut self, force: bool) {}
 }
