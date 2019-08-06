@@ -1,5 +1,7 @@
 pub use crate::controller::ControllerMessage;
 pub use crate::element::Element;
+// Needs to read ItemList to display todo list.
+pub use crate::store::ItemList;
 pub use crate::{Message, Scheduler};
 pub use std::cell::RefCell;
 pub use std::rc::Rc;
@@ -292,4 +294,5 @@ impl View {
 pub enum ViewMessage {
     // TODO(benlee12): Why not just use a unit struct?
     ClearNewTodo(),
+    ShowItem(ItemList),
 }

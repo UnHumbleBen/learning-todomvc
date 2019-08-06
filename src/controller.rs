@@ -117,6 +117,8 @@ impl Controller {
         }
     }
     /// Refresh the list based on the current route.
+    ///
+    /// If `force` is `true`, a refresh is guaranteed to happen.
     pub fn _filter(&mut self, force: bool) {
         // route = &String
         let route = &self.active_route;
@@ -130,13 +132,16 @@ impl Controller {
                 "active" => ItemQuery::Completed { completed: false },
                 _ => ItemQuery::EmptyItemQuery,
             };
-            let mut v: Option<()> = None;
+            let mut v = None;
             {
                 // Mutably borrows the Store.
                 let store = &mut self.store;
                 if let Some(res) = store.find(query) {
-                    //
+                    v = Some(res.into());
                 }
+            }
+            if let Some(res) = v {
+                self.add_message(ViewMessage::ShowItem(res));
             }
         }
     }

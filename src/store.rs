@@ -272,3 +272,9 @@ pub enum ItemQuery {
 pub struct ItemListSlice<'a> {
     list: Vec<&'a Item>,
 }
+
+impl<'a> Into<ItemList> for ItemListSlice<'a> {
+    fn into(self) -> ItemList {
+        ItemList { list: vec![] }
+    }
+}
