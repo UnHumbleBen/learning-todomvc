@@ -17,6 +17,8 @@ Progress:
                 - [ ] `scheduler::Scheduler::next_message`
                     - [ ] `controller::Controller::call`
                         - [ ] `controller::Controller::[all message handlers]`
+                            - [x] `controller::Controller::add_message`
+                            - [ ] `controller::Controller::_filter`
                     - [ ] `view::View::call`
         - [ ] `view::View::bind_[*]`
     - [ ] `scheduler::Scheduler::set_view`
