@@ -180,8 +180,25 @@ impl Store {
         self.data.push(item);
         self.sync_local_storage();
     }
+    /// Find items with properties matching those on query.
+    ///
+    /// # Parameters
+    ///
+    /// `ItemQuery` `query` - Query to match
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// let data = db.find(ItemQuery::Completed { completed: true });
+    /// // `data` will contain items whose completed properties are true.
+    /// ```
     pub fn find(&mut self, query: ItemQuery) -> Option<ItemListSlice<'_>> {
-        Some(ItemListSlice { list: vec![] })
+        Some(
+            self.data
+                .iter()
+                .filter(|todo| query.matches(*todo))
+                .collect(),
+        )
     }
 
     /// Writes the local `ItemList` to `localStorage`.

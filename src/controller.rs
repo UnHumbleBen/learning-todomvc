@@ -12,9 +12,6 @@ pub use std::rc::Weak;
 /// The controller of the application.
 ///
 /// Turns page state into functionality.
-///
-/// # Fields
-///
 pub struct Controller {
     /// the struct that stores item into `localStorage`.
     pub store: Store,
