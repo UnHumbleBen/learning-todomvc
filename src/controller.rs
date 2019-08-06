@@ -1,4 +1,4 @@
-// Controller needs access to Item and Store structs.
+// Controller needs access to Item, ItemQuery, and Store structs/enums.
 pub use crate::store::*;
 // Controller needs to send messages to View.
 pub use crate::view::ViewMessage;
@@ -117,7 +117,29 @@ impl Controller {
         }
     }
     /// Refresh the list based on the current route.
-    pub fn _filter(&mut self, force: bool) {}
+    pub fn _filter(&mut self, force: bool) {
+        // route = &String
+        let route = &self.active_route;
+
+        // If filter is forced or ...
+        // TODO(benlee12): other conditions
+        if force || self.last_active_route != "" || &self.last_active_route != route {
+            // Assigns appropriate ItemQuery variant to query.
+            let query = match route.as_str() {
+                "completed" => ItemQuery::Completed { completed: true },
+                "active" => ItemQuery::Completed { completed: false },
+                _ => ItemQuery::EmptyItemQuery,
+            };
+            let mut v: Option<()> = None;
+            {
+                // Mutably borrows the Store.
+                let store = &mut self.store;
+                if let Some(res) = store.find(query) {
+                    //
+                }
+            }
+        }
+    }
 }
 
 /// Messages that represent the methods to be called on the Controller

@@ -13,7 +13,6 @@ pub struct Store {
     pub data: ItemList,
     pub name: String,
 }
-
 impl Store {
     /// Creates a new store with `name` as the local storage value name.
     /// Caches the `localStorage` for todo items if it exists.
@@ -147,7 +146,18 @@ impl Store {
         Some(())
     }
 
-    pub fn insert(&mut self, item: Item) {}
+    /// Insert an item into the Store.
+    ///
+    /// `Item` item is the Item to insert
+    pub fn insert(&mut self, item: Item) {
+        self.data.push(item);
+        self.sync_local_storage();
+    }
+    pub fn find(&mut self, query: ItemQuery) -> Option<ItemListSlice<'_>> {
+        Some(ItemListSlice { list: vec![] })
+    }
+
+    pub fn sync_local_storage(&mut self) {}
 }
 /// A trait for a list of items of type `T`.
 ///
@@ -185,4 +195,14 @@ pub struct Item {
     pub completed: bool,
     /// A unique id to identify this todo.
     pub id: String,
+}
+
+/// Represents a search into the store.
+pub enum ItemQuery {
+    Completed { completed: bool },
+    EmptyItemQuery,
+}
+
+pub struct ItemListSlice<'a> {
+    list: Vec<&'a Item>,
 }

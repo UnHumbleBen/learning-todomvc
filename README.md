@@ -18,7 +18,7 @@ to learn how MVC works in this language.
                     - [x] `controller::Controller::call`
                         - [ ] `controller::Controller::[all message handlers]`
                             - [x] `controller::Controller::add_message`
-                            - [x] `controller::Controller::_filter`
+                            - [ ] `controller::Controller::_filter`
                             - [x] `store::Store::insert`
                                 - [x] `store::(ItemList as ItemListTrait)::push`
                                 - [ ] `store::Store::sync_local_storage`
