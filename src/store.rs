@@ -24,9 +24,9 @@
 //! indicating task completion, and `id` is a `String` identifier for the task.
 /// The JSON object contains methods for parsing JavaScript Object Notation
 /// (JSON) and converting values to JSON.
-pub use js_sys::JSON;
+use js_sys::JSON;
 /// Imports JsValue
-pub use wasm_bindgen::prelude::*;
+use wasm_bindgen::prelude::*;
 /// Stores items into `localStorage`.
 pub struct Store {
     /// `localStorage` which contains data stored across browser sessions.
@@ -326,7 +326,11 @@ impl Store {
 }
 /// A trait for a list of items of type `T`.
 ///
-/// TODO(benlee12): why use a trait?
+/// # Motivation
+///
+/// `ItemListSlice` shares some functionalities with `ItemList` because they
+/// are both a list of Items. Encapsulating these functionalities into a trait
+/// helps organize the code.
 ///
 /// TODO(benlee12): why do public traits must have public functions?
 pub trait ItemListTrait<T> {
@@ -338,6 +342,7 @@ pub trait ItemListTrait<T> {
     fn iter(&self) -> std::slice::Iter<'_, T>;
 }
 
+/// A growable list of `Item`s.
 pub struct ItemList {
     list: Vec<Item>,
 }
@@ -381,8 +386,35 @@ impl ItemQuery {
     }
 }
 
+/// A dynamically-sized view into a sequence of `Item`.
+///
+/// Because this struct borrows the `Item`s it points to, the sequence that
+/// contains those `Item`s cannot be mutated until `ItemListSlice` is dropped.
 pub struct ItemListSlice<'a> {
     list: Vec<&'a Item>,
+}
+
+/// Gives `ItemListSlice` the overlapping functionalities with `ItemList`.
+///
+/// # Implementation Details
+///
+/// Because both `ItemListSlice` and `ItemList` use the field `list`, the
+/// implementations of methods are almost identical, with the only difference
+/// in type, as reflected by the different types their field `list`.
+impl<'a> ItemListTrait<&'a Item> for ItemListSlice<'a> {
+    fn new() -> ItemListSlice<'a> {
+        ItemListSlice { list: Vec::new() }
+    }
+
+    fn push(&mut self, item: &'a Item) {
+        // Appends `item` to the back of the `list`.
+        self.list.push(item);
+    }
+
+    fn iter(&self) -> std::slice::Iter<'_, &'a Item> {
+        // Returns an iterator over the vector slice.
+        self.list.iter()
+    }
 }
 
 impl<'a> Into<ItemList> for ItemListSlice<'a> {
@@ -392,8 +424,18 @@ impl<'a> Into<ItemList> for ItemListSlice<'a> {
 }
 
 use std::iter::FromIterator;
+/// # Motivation
+/// This is the trait we needed to implement for `ItemListSlice` in order to use
+/// `std::iter::Iterator::collect`
 impl<'a> FromIterator<&'a Item> for ItemListSlice<'a> {
     fn from_iter<I: IntoIterator<Item = &'a Item>>(iter: I) -> Self {
-        ItemListSlice { list: vec![] }
+        // Initialize an empty ItemListSlice.
+        let mut c = ItemListSlice::new();
+        // Push each &Item from iterator into ItemListSLice.
+        for i in iter {
+            c.push(i);
+        }
+        // Returns the ItemListSlice.
+        c
     }
 }
