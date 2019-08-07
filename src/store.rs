@@ -134,10 +134,11 @@ impl Store {
                 // Concretely, T = js_sys::Array
                 //
                 // Performs a dynamic cast (checked at runtime) of `item` into an Array.
+                // When deciding whether to use dyn_ref or dyn_into, prefer
+                // dyn_ref since most functions only need a reference.
                 //
                 // If `item` cannot be casted to Array, then the method returns None.
                 // Otherwise it returns Some(&Array), which is unwrapped with ?.
-                // TODO(benlee12): why use dyn_ref instead of dyn_into?
                 let item_array: &js_sys::Array = wasm_bindgen::JsCast::dyn_ref(&item)?;
                 // Extracts title field from item_array and assign it to title.
                 //
@@ -220,7 +221,9 @@ impl Store {
                 //
                 // filter(std::slice::Iter<'_, Item>, closure_filter)
                 // -> Filter<std::slice::Iter<'_, Item>, closure_filter>
-                .filter(|todo| query.matches(*todo))
+                //
+                // TODO(benlee12): remove *todo (pending on github)
+                .filter(|todo| query.matches(todo))
                 // impl<I: Iterator, P> Iterator for Filter<I, P>
                 // where
                 //     P: FnMut(&I::Item) -> bool,
@@ -298,14 +301,10 @@ impl Store {
         for item in self.data.iter() {
             // Create an empty JS Array for serializing a single todo item.
             let child = js_sys::Array::new();
-            // TODO(benlee12): Why do we need to clone?
-            // TODO(benlee12): Why does push borrow?
+            // Push can just borrow because in JavaScript, there is no concept
+            // of ownership. Don't worry about the JsValue deallocating too
+            // early becasue that is handled by the JS garbage collector.
             child.push(&JsValue::from(&item.title));
-
-            // The way based on the example
-            // let s = item.title.clone();
-            // child.push(&JsValue::from(&s));
-
             child.push(&JsValue::from(item.completed));
             child.push(&JsValue::from(&item.id));
 
@@ -313,8 +312,6 @@ impl Store {
         }
         // Converts `array` into a JSON formatted JsString.
         if let Ok(storage_string) = JSON::stringify(&JsValue::from(array)) {
-            // TODO(benlee12): Remove unnecessary .to_string() and
-            // add this .set_item(&self.name, &storage_string) below
             let storage_string: String = storage_string.into();
             self.local_storage
                 // Passes `name` as key and storage string as
@@ -376,13 +373,29 @@ pub struct Item {
 
 /// Represents a search into the store.
 pub enum ItemQuery {
+    /// Search for `Item` with id = id`.
+    Id { id: String },
+    /// Search for all `Item` with completed = `completed`.
     Completed { completed: bool },
+    /// No requirements, search for all `Item`s.
     EmptyItemQuery,
 }
 
 impl ItemQuery {
+    /// Returns `true` if the borrowed Item `item` corresponds with this
+    /// `ItemQuery`, `false` otherwise.
     pub fn matches(&self, item: &Item) -> bool {
-        false
+        match *self {
+            // All items match with EmptyItemQuery
+            ItemQuery::EmptyItemQuery => true,
+            // `ref` is needed because id (a String) does not implement Copy,
+            // so it would have to be moved, but a move cannot happen while
+            // self is borrowed. The comparision between &String is possbile
+            // thanks to deref coercion converting both of them to String.
+            ItemQuery::Id { ref id } => &item.id == id,
+            // If item's completed matches query completed, return true.
+            ItemQuery::Completed { completed } => item.completed == completed,
+        }
     }
 }
 
