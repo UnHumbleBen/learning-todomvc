@@ -20,12 +20,13 @@ to learn how MVC works in this language.
                             - [x] `controller::Controller::add_message`
                             - [x] `controller::Controller::_filter`
                                 - [x] `store::ItemList::find`
-                                    - [x] `store::ItemList::find`
                                     - [x] `store::ItemQuery::matches`
                                     - [x] `store::(ItemListSlice as FromIterator<&store::Item>)::from_iter`
                                 - [ ] `store::(ItemListSlice as Into<ItemList>)::into`
                             - [x] `store::Store::insert`
                                 - [x] `store::(ItemList as ItemListTrait)::push`
+                                    - [x] `dummy done`
+                                    - [ ] `dummy not done`
                                 - [x] `store::Store::sync_local_storage`
                     - [ ] `view::View::call`
         - [ ] `view::View::bind_[*]`
