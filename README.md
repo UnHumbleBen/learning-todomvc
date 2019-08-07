@@ -25,8 +25,6 @@ to learn how MVC works in this language.
                                 - [ ] `store::(ItemListSlice as Into<ItemList>)::into`
                             - [x] `store::Store::insert`
                                 - [x] `store::(ItemList as ItemListTrait)::push`
-                                    - [x] `dummy done`
-                                    - [ ] `dummy not done`
                                 - [x] `store::Store::sync_local_storage`
                     - [ ] `view::View::call`
         - [ ] `view::View::bind_[*]`
