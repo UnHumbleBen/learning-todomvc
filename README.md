@@ -21,8 +21,7 @@ to learn how MVC works in this language.
                             - [x] `controller::Controller::_filter`
                                 - [x] `store::ItemList::find`
                                     - [x] `store::ItemQuery::matches`
-                                    - [x]
-                                    `store::(ItemListSlice as FromIterator<&store::Item>)::from_iter`
+                                    - [x] `store::(ItemListSlice as FromIterator<&store::Item>)::from_iter`
                                 - [ ] `store::(ItemListSlice as Into<ItemList>)::into`
                             - [x] `store::Store::insert`
                                 - [x] `store::(ItemList as ItemListTrait)::push`
