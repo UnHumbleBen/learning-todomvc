@@ -192,11 +192,100 @@ impl Store {
     /// let data = db.find(ItemQuery::Completed { completed: true });
     /// // `data` will contain items whose completed properties are true.
     /// ```
+    ///
+    /// TODO(benlee12): Why is Option necessary?
     pub fn find(&mut self, query: ItemQuery) -> Option<ItemListSlice<'_>> {
         Some(
+            // self.data = ItemList
             self.data
+                // .iter() -> std::slice::Iter<'_, Item>
+                // Note that '_ just indicates that Iter is borrowing ItemList.
                 .iter()
+                // impl<'a, T> Iterator for Iter<'a, T> {
+                //     type Item = Iter;
+                //
+                // Concretely,
+                //     'a = '_
+                //     T = Item
+                //     type Item = &'_ Item
+                //
+                // filter<P>(self, predicate: P) -> Filter<Self, P>
+                // where
+                //     Self: Sized,
+                //     P: FnMut(&Self::Item) -> bool,
+                //
+                // Concretely,
+                //    Self = std::slice::Iter<'_, Item>: Sized
+                //    P = closure_filter: FnMut(&&Item) -> bool
+                //
+                // filter(std::slice::Iter<'_, Item>, closure_filter)
+                // -> Filter<std::slice::Iter<'_, Item>, closure_filter>
                 .filter(|todo| query.matches(*todo))
+                // impl<I: Iterator, P> Iterator for Filter<I, P>
+                // where
+                //     P: FnMut(&I::Item) -> bool,
+                //     type Item = I::Item
+                //
+                // Concretely,
+                //     I = std::slice::Iter<'_,Item>: Iterator
+                //     P = closure_filter: FnMut(&&Item) -> bool
+                //     type Item = &'_ Item
+                //
+                //
+                // fn collect<B: FromIterator<Self::Item>>(self) -> B
+                // where
+                //     Self: Sized,
+                //
+                // Concretely,
+                //     Self = Filter<std::slice::Iter<'_, Item>: Sized
+                //     Self::Item = &'_ Item
+                //
+                // We have some freedom with B. For the return type, we chose
+                // ItemListSlice<'_>. As you can see from the function trait
+                // requirements, we need ItemListSlice to implement
+                // FromIterator<A> for A = &Item
+                //
+                // Looking at the trait definition, we must implement
+                //
+                // fn from_iter<T>(iter: T) -> Self
+                // where
+                //     T: IntoIterator<Item = A>,
+                //
+                // or Concretely,
+                //     Self = ItemListSlice
+                //     T: IntoIterator<Item = &Item>
+                //
+                // fn from_iter(iter: T ) -> ItemListSlice
+                //
+                // T =  Filter<std::slice::Iter<'_, Item>, closure_filter>
+                //
+                // Now the question is, does that Filter we have above satisfy
+                // this trait?
+                //
+                // Let's see, IntoIterator is implemented via a blanket
+                // blanket implementation.
+                //
+                // impl<I> IntoIterator for I
+                // where
+                //     I: Iterator,
+                // type Item = <I as Iterator>::Item
+                // type IntoIter = I
+                //
+                // Concretely, I = Filter<_,_>
+                // type Item = &'_ Item
+                // type IntoIter = Filter<_,_>
+                //
+                // As we can see, Item = &'_ Item, so Filter satisfy the trait!
+                // Okay, let's bring it back together to collect()
+                //
+                // fn collect<B: FromIterator<Self::Item>>(self) -> B
+                //
+                // Concretely, we showed that B = ItemListSlice satisfies the
+                // the trait requirement, assuming we implement
+                // FromIterator<&'_ Item> for ItemListSlice
+                //
+                // fn collect(Filter<Iter<'_,Item>, closure_filter>)
+                // -> ItemListSlice
                 .collect(),
         )
     }
@@ -286,6 +375,12 @@ pub enum ItemQuery {
     EmptyItemQuery,
 }
 
+impl ItemQuery {
+    pub fn matches(&self, item: &Item) -> bool {
+        false
+    }
+}
+
 pub struct ItemListSlice<'a> {
     list: Vec<&'a Item>,
 }
@@ -293,5 +388,12 @@ pub struct ItemListSlice<'a> {
 impl<'a> Into<ItemList> for ItemListSlice<'a> {
     fn into(self) -> ItemList {
         ItemList { list: vec![] }
+    }
+}
+
+use std::iter::FromIterator;
+impl<'a> FromIterator<&'a Item> for ItemListSlice<'a> {
+    fn from_iter<I: IntoIterator<Item = &'a Item>>(iter: I) -> Self {
+        ItemListSlice { list: vec![] }
     }
 }

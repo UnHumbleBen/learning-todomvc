@@ -19,7 +19,7 @@ to learn how MVC works in this language.
                         - [ ] `controller::Controller::[all message handlers]`
                             - [x] `controller::Controller::add_message`
                             - [x] `controller::Controller::_filter`
-                                - [ ] `store::ItemList::find`
+                                - [x] `store::ItemList::find`
                                     - [ ] `store::ItemQuery::matches`
                                     - [ ]
                                     `store::(ItemListSlice as FromIterator<&store::Item>)::from_iter`
